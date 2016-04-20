@@ -7,7 +7,6 @@ current_revenue = 0
 
 for line in sys.stdin:
     key,revenue = line.strip().split('\t')
-    zipcode,month = key.split(',')
     try:
         revenue = float(revenue)
     except ValueError:
@@ -17,9 +16,11 @@ for line in sys.stdin:
         current_revenue += revenue
     else:
         if current_key != "":
+            zipcode,month = current_key.split(',')
             print "%s\t%s,%d,%f" %(zipcode,month,current_trips,current_revenue)
         current_key = key
         current_trips = 1
         current_revenue = revenue
 if current_key != "":
+    zipcode,month = current_key.split(',')
     print "%s\t%s,%d,%f" %(zipcode,month,current_trips,current_revenue)
