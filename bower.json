@@ -1,0 +1,16 @@
+{
+  "name": "NYC_Taxi_Data_Analysis",
+  "homepage": "https://github.com/Geminiii/NYC_Taxi_Data_Analysis",
+  "authors": [
+    "Geminiii"
+  ],
+  "description": "Visualization",
+  "main": "d3, jquery",
+  "license": "MIT",
+  "dependencies": {
+    "jQuery": "^2.2.3",
+    "d3": "^3.5.16",
+    "d3-queue": "queue-async#^2.0.3",
+    "topojson": "^1.6.24"
+  }
+}

@@ -1,0 +1,131 @@
+<html>  
+  <head>  
+        <meta charset="utf-8">  
+        <title>Chord</title>  
+  <style>
+
+	.chord path {
+  		fill-opacity: 0.67;
+  		stroke: #000;
+  		stroke-width: 0.5px;
+	}
+
+  </style>
+  </head> 
+    <body>  
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="d3/lib/colorbrewer/colorbrewer.js"></script>
+		<script>
+		
+		//1.Define data
+		
+		var city_name = [ 'Tribeca, WTC, Civic Center','Greenwich Village, West Village, SoHo','Chinatown, East Village, Lower East Side','Chelsa, Hudson Yards','Diamond District, K-town','Kips Bay, Murry Hill','Lincoln Towers, Upper West Side','Upper East Side','Hamilton Heights','','East Harlem','','Central Park'];
+
+		var population = [[14984, 8647, 1923, 5193, 11171, 4542, 424, 1590, 82, 42, 120, 65, 105], [10763, 15476, 2678, 9945, 23238, 5838, 575, 2193, 77, 19, 118, 56, 202], [3839, 5361, 2826, 2417, 7449, 5175, 182, 1027, 44, 36, 126, 25, 58], [7766, 8552, 849, 22025, 36258, 6506, 4265, 4948, 633, 169, 529, 303, 890], [15419, 13858, 2213, 28837, 91444, 24100, 5456, 16510, 800, 226, 1155, 359, 2208], [10125, 7248, 2677, 7163, 44784, 25111, 1736, 14062, 226, 113, 841, 197, 609], [2163, 1119, 173, 7472, 22974, 4188, 20163, 14322, 3597, 766, 2266, 918, 2136], [7928, 3312, 1105, 5941, 52812, 23231, 11522, 58048, 1223, 599, 6601, 583, 3218], [225, 138, 33, 866, 1431, 271, 3413, 1209, 3135, 1323, 1143, 1052, 292], [180, 68, 27, 439, 1266, 322, 2048, 1220, 2452, 3464, 3118, 383, 416], [502, 143, 162, 619, 2207, 1086, 2153, 5321, 1673, 2566, 6039, 511, 565], [85, 56, 10, 307, 302, 105, 473, 264, 821, 353, 233, 1957, 36],[330,198,28,611,4311,744,1836,3536,241,115,439,74,964]];
+		//2.Convert data
+		var chord_layout = d3.layout.chord()
+			                 .padding(0.03)		//节点之间的间隔
+			                 .sortSubgroups(d3.descending)	//排序
+			                 .matrix(population);	//输入矩阵
+
+		var groups = chord_layout.groups();
+		var chords = chord_layout.chords();
+
+		console.log( groups );
+		console.log( chords );
+		
+		//3.SVG，chord, color
+		var width  = 800;
+		var height = 800;
+		var innerRadius = width/2 * 0.7;
+		var outerRadius = innerRadius * 1.1;
+
+		var color20 = d3.scale.category20c();
+
+		var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+		    .append("g")
+			.attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+		//4.Arcs 
+		var outer_arc =  d3.svg.arc()
+					 .innerRadius(innerRadius)
+					 .outerRadius(outerRadius);
+		
+		var g_outer = svg.append("g");
+		
+		g_outer.selectAll("path")
+				.data(groups)
+				.enter()
+				.append("path")
+				.style("fill", function(d) { return color20(d.index); })
+				.style("stroke", function(d) { return color20(d.index); })
+				.attr("d", outer_arc )
+                .on("mouseover", fade(.1))
+                .on("mouseout", fade(1));
+		
+        function fade(opacity) {
+          return function(g, i) {
+            svg.selectAll(".chord path")
+                .filter(function(d) { return d.source.index != i && d.target.index != i; })
+              .transition()
+                .style("opacity", opacity);
+          };
+        }
+            
+		g_outer.selectAll("text")
+				.data(groups)
+				.enter()
+				.append("text")
+				.each( function(d,i) { 
+					d.angle = (d.startAngle + d.endAngle) / 2; 
+					d.name = city_name[i];
+				})
+                .attr("dx","-2.5em")
+				.attr("dy",".35em")
+                //.attr("dy",function(d,i){
+                    //return (4.5-i)+"em";
+        //})
+                .attr("font-size", 11)
+				.attr("transform", function(d){
+					return "rotate(" + ( d.angle * 180 / Math.PI ) + ")" +
+						   "translate(0,"+ -1.0*(outerRadius+10) +")" +
+						    ( ( d.angle > Math.PI*3/4 && d.angle < Math.PI*5/4 ) ? "rotate(180)" : "");
+				})
+				.text(function(d){
+					return d.name;
+				});
+				
+
+		//5.Inner chords
+		var inner_chord =  d3.svg.chord()
+						.radius(innerRadius);
+		
+		svg.append("g")
+			.attr("class", "chord")
+		    .selectAll("path")
+			.data(chords)
+		    .enter()
+			.append("path")
+			.attr("d", inner_chord )
+		    .style("fill", function(d) { return color20(d.source.index); })
+			.style("opacity", 1)
+			.on("mouseover",function(d,i){
+				d3.select(this)
+                    .transition()
+                .style("opacity", .5)
+					//.style("fill","yellow");
+			})
+			.on("mouseout",function(d,i) { 
+				d3.select(this)
+					.transition()
+                    .duration(1000)
+					.style("fill",color20(d.source.index))
+                    .style("opacity", 1);
+			});
+
+		</script>
+		
+    </body>  
+</html>  

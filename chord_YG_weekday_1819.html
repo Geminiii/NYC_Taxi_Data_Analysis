@@ -1,0 +1,138 @@
+<html>  
+  <head>  
+        <meta charset="utf-8">  
+        <title>Chord</title>  
+  <style>
+
+	.chord path {
+  		fill-opacity: 0.67;
+  		stroke: #000;
+  		stroke-width: 0.5px;
+	}
+
+  </style>
+  </head> 
+    <body>  
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="d3/lib/colorbrewer/colorbrewer.js"></script>
+		<script>
+		
+		//1.定义数据
+		// 城市名
+		var city_name = [ 'Tribeca, WTC, Civic Center','Greenwich Village, West Village, SoHo','Chinatown, East Village, Lower East Side','Chelsa, Hudson Yards','Diamond District, K-town','Kips Bay, Murry Hill','Lincoln Towers, Upper West Side','Upper East Side','Hamilton Heights','','East Harlem','','Central Park'];
+		//Central Harlem  Inwood
+		// 城市人口的来源，如
+		//				北京		上海
+		//	北京		1000		3045
+		//	上海		3214		2000
+		// 表示北京市的人口有1000个人来自本地，有3045人是来自上海的移民，总人口为 1000 + 3045
+		// 上海市的人口有2000个人来自本地，有3214人是来自北京的移民，总人口为 3214 + 2000
+		var population = [[9805, 11647, 7231, 6480, 8707, 4693, 1789, 2928, 102, 113, 172, 158, 220], [8797, 23254, 13643, 14320, 18522, 7586, 2662, 3641, 187, 161, 193, 106, 419], [2503, 7045, 7909, 2950, 5759, 5527, 634, 1655, 59, 75, 181, 45, 155], [4787, 16102, 5427, 28014, 27798, 8416, 13726, 7645, 741, 741, 660, 506, 1481], [9757, 31086, 14954, 34521, 76494, 33053, 22450, 37592, 895, 1255, 2033, 563, 3833], [3306, 10099, 11127, 8505, 26431, 24053, 5545, 22598, 308, 471, 1146, 197, 1068], [721, 2057, 934, 9124, 10946, 3062, 41480, 16514, 4065, 2591, 2459, 1195, 3235], [1926, 4737, 3519, 6501, 23561, 17304, 22224, 73313, 1099, 1763, 7698, 492, 4851], [49, 146, 85, 545, 490, 215, 3674, 984, 2508, 2051, 1082, 925, 276], [37, 88, 90, 298, 339, 169, 1770, 790, 2029, 5081, 2495, 544, 276], [87, 167, 315, 447, 953, 674, 3120, 5587, 1112, 3243, 5523, 374, 527], [30, 59, 26, 188, 147, 53, 637, 238, 663, 336, 187, 1676, 31],[274,777,290,1529,4576,1156,5242,5529,256,370,541,77,1827]];
+
+		//2.转换数据，并输出转换后的数据
+		var chord_layout = d3.layout.chord()
+			                 .padding(0.03)		//节点之间的间隔
+			                 .sortSubgroups(d3.descending)	//排序
+			                 .matrix(population);	//输入矩阵
+
+		var groups = chord_layout.groups();
+		var chords = chord_layout.chords();
+
+		console.log( groups );
+		console.log( chords );
+		
+		//3.SVG，弦图，颜色函数的定义
+		var width  = 800;
+		var height = 800;
+		var innerRadius = width/2 * 0.7;
+		var outerRadius = innerRadius * 1.1;
+
+		var color20 = d3.scale.category20c();
+
+		var svg = d3.select("body").append("svg")
+			.attr("width", width)
+			.attr("height", height)
+		    .append("g")
+			.attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+
+		//4.绘制节点（即分组，有多少个城市画多少个弧形），及绘制城市名称
+		var outer_arc =  d3.svg.arc()
+					 .innerRadius(innerRadius)
+					 .outerRadius(outerRadius);
+		
+		var g_outer = svg.append("g");
+		
+		g_outer.selectAll("path")
+				.data(groups)
+				.enter()
+				.append("path")
+				.style("fill", function(d) { return color20(d.index); })
+				.style("stroke", function(d) { return color20(d.index); })
+				.attr("d", outer_arc )
+                .on("mouseover", fade(.1))
+                .on("mouseout", fade(1));
+		
+        function fade(opacity) {
+          return function(g, i) {
+            svg.selectAll(".chord path")
+                .filter(function(d) { return d.source.index != i && d.target.index != i; })
+              .transition()
+                .style("opacity", opacity);
+          };
+        }
+            
+		g_outer.selectAll("text")
+				.data(groups)
+				.enter()
+				.append("text")
+				.each( function(d,i) { 
+					d.angle = (d.startAngle + d.endAngle) / 2; 
+					d.name = city_name[i];
+				})
+                .attr("dx","-2.5em")
+				.attr("dy",".35em")
+                //.attr("dy",function(d,i){
+                    //return (4.5-i)+"em";
+        //})
+                .attr("font-size", 11)
+				.attr("transform", function(d){
+					return "rotate(" + ( d.angle * 180 / Math.PI ) + ")" +
+						   "translate(0,"+ -1.0*(outerRadius+10) +")" +
+						    ( ( d.angle > Math.PI*3/4 && d.angle < Math.PI*5/4 ) ? "rotate(180)" : "");
+				})
+				.text(function(d){
+					return d.name;
+				});
+				
+
+		//5.绘制内部弦（即所有城市人口的来源，即有5*5=25条弧）
+		var inner_chord =  d3.svg.chord()
+						.radius(innerRadius);
+		
+		svg.append("g")
+			.attr("class", "chord")
+		    .selectAll("path")
+			.data(chords)
+		    .enter()
+			.append("path")
+			.attr("d", inner_chord )
+		    .style("fill", function(d) { return color20(d.source.index); })
+			.style("opacity", 1)
+			.on("mouseover",function(d,i){
+				d3.select(this)
+                    .transition()
+                .style("opacity", .5)
+					//.style("fill","yellow");
+			})
+			.on("mouseout",function(d,i) { 
+				d3.select(this)
+					.transition()
+                    .duration(1000)
+					.style("fill",color20(d.source.index))
+                    .style("opacity", 1);
+			});
+
+		</script>
+		
+    </body>  
+</html>  
