@@ -2,99 +2,86 @@
 <meta charset="utf-8">
 
 <style>
+	.q5 { fill:#BBDEFB; }
 
+	.q4 { fill:#64B5F6; }
 
-.q5 { fill:#BBDEFB; }
+	.q3 { fill:#2196F3; }
 
-.q4 { fill:#64B5F6; }
+	.q2 { fill:#1976D2; }
 
-.q3 { fill:#2196F3; }
+	.q1 { fill:#0D47A1; }
 
-.q2 { fill:#1976D2; }
+	.q0 { fill:#072070; }
 
-.q1 { fill:#0D47A1; }
+	.q6 { fill:#FFCDD2; }
 
-.q0 { fill:#072070; }
+	.q7 { fill:#E57373; }
 
-.q6 { fill:#FFCDD2; }
+	.q8 { fill:#F44336; }
 
-.q7 { fill:#E57373; }
+	.q9 { fill:#D32F2F; }
 
-.q8 { fill:#F44336; }
+	.q10{ fill:#C62828; }
 
-.q9 { fill:#D32F2F; }
+	.q11{ fill:#B71C1C; }
 
-.q10{ fill:#C62828; }
+	#boroughs {
+	  stroke: grey;
+		stroke-width: 1px;
+		fill: blue;
+	}
+	
+	#container{
+	    position: relative;
+	    display: block;
+	    background-color: #b1b1b1;
+	    width: 1000px;
+	    height: 1000px;
+	    margin: 100px;
+	    padding: 100px;
+	}
+	
+	#chart{
+	  position: absolute
+	  font: 10px sans-serif;
+	  background-color: steelblue;
+	  text-align: right;
+	  padding: 10px;
+	  margin: 10px;
+	  color: white;
+	}
+	
+	.bar {
+	  fill: blue;
+	}
 
-.q11{ fill:#B71C1C; }
+	.bar:hover {
+	  fill: brown;
+	}
 
+	.axis {
+	  font: 10px sans-serif;
+	}
 
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
 
-247,252,245
-229,245,224
-199,233,192
-161,217,155
-116,196,118
-65,171,93
-35,139,69
-0,109,44
-0,68,27
-
-
-
-#boroughs {
-  stroke: grey;
-	stroke-width: 1px;
-	fill: blue;
-}
-#container{
-    position: relative;
-    display: block;
-    background-color: #b1b1b1;
-    width: 1000px;
-    height: 1000px;
-    margin: 100px;
-    padding: 100px;
-}
-#chart{
-  position: absolute
-  font: 10px sans-serif;
-  background-color: steelblue;
-  text-align: right;
-  padding: 10px;
-  margin: 10px;
-  color: white;
-}
-.bar {
-  fill: blue;
-}
-
-.bar:hover {
-  fill: brown;
-}
-
-.axis {
-  font: 10px sans-serif;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
-
-.x.axis path {
-  display: none;
-}
-.d3-tip {
-  line-height: 2;
-  font-weight: bold;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.9);
-  color: #fff;
-  border-radius: 2px;
-}
+	.x.axis path {
+	  display: none;
+	}
+	.d3-tip {
+	  line-height: 2;
+	  font-weight: bold;
+	  padding: 12px;
+	  background: rgba(0, 0, 0, 0.9);
+	  color: #fff;
+	  border-radius: 2px;
+	}
 
 </style>
 
@@ -109,7 +96,7 @@
 //set their top/bottom/left/ride attributes in css
 //use absolute positioning
 
-//Choropleth Stuff
+	//Choropleth Stuff
 	var UsageByVertexId = d3.map();
 	var quantize = d3.scale.quantize()
 		.domain([-1, 0, 1])
@@ -117,7 +104,7 @@
 		//.range(d3.range(11).map(function(i) { return "q" + i; }));
 
 
-//A tooltip for displaying the name of the station
+	//A tooltip for displaying the name of the station
 	var tooltip = d3.select("body")
 		.append("rec")
 		.style("padding","2px")
@@ -134,7 +121,7 @@
 	var width = 1600,
 	height = 1250;
    
-//create the initial svg object
+	//create the initial svg object
 	var svg = d3.select("body").append("svg")
 		.attr("width", width)
 		.attr("height", height);
@@ -157,7 +144,7 @@
 		})
 	svg.call(tip);	
 	
-// Load and display NYC
+	// Load and display NYC
 	d3.json("nyctopojson.json", function(error, topology) {
 		console.log(topojson.feature(topology,topology.objects.nycgeojson));
 		g.selectAll("path")
@@ -172,7 +159,7 @@
  
 	
 	var vertices=[];
-//Load up the data and do your thing!  In - Out
+	//Load up the data and do your thing!  In - Out
 	var stat = d3.csv("citibike_net.csv", function(stats) {	
 	stats.forEach(function(d){
 	d.dENTRIES=+d.dENTRIES;
@@ -181,50 +168,49 @@
 	d.Station_Longitude=+d.Station_Longitude;
 	});
 
-//Custom function to compare arrays
+	//Custom function to compare arrays
 	// Warn if overriding existing method
-	if(Array.prototype.equals)
-    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
-// attach the .equals method to Array's prototype to call it on any array
-	Array.prototype.equals = function (array) {
-    // if the other array is a falsy value, return
-    if (!array)
-        return false;
-
-    // compare lengths - can save a lot of time 
-    if (this.length != array.length)
-        return false;
-
-    for (var i = 0, l=this.length; i < l; i++) {
-        // Check if we have nested arrays
-        if (this[i] instanceof Array && array[i] instanceof Array) {
-            // recurse into the nested arrays
-            if (!this[i].equals(array[i]))
-                return false;       
-        }           
-        else if (this[i] != array[i]) { 
-            // Warning - two different object instances will never be equal: {x:20} != {x:20}
-            return false;   
-        }           
-    }       
-    return true;
+	if(Array.prototype.equals) {
+    	    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 	}
-// Hide method from for-in loops
+	// attach the .equals method to Array's prototype to call it on any array
+	Array.prototype.equals = function (array) {
+	    // if the other array is a falsy value, return
+	    if (!array)
+		return false;
+	    // compare lengths - can save a lot of time 
+	    if (this.length != array.length)
+		return false;
+
+	    for (var i = 0, l=this.length; i < l; i++) {
+		// Check if we have nested arrays
+		if (this[i] instanceof Array && array[i] instanceof Array) {
+		    // recurse into the nested arrays
+		    if (!this[i].equals(array[i]))
+			return false;       
+		} else if (this[i] != array[i]) { 
+		    // Warning - two different object instances will never be equal: {x:20} != {x:20}
+		    return false;   
+		}           
+	    }       
+    	return true;
+       }
+	// Hide method from for-in loops
 	Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
-//custom indexOf to find coordinates inside of an array
+	//custom indexOf to find coordinates inside of an array
 	function myIndexOf(arr) {    
-    for (var i = 0; i < coords.length; i++) {
-        if (coords[i][0] == arr[0] && coords[i][1] == arr[1]) {
-            return i;
-        }
-    }
-    return -1;
+	    for (var i = 0; i < coords.length; i++) {
+		if (coords[i][0] == arr[0] && coords[i][1] == arr[1]) {
+		    return i;
+		}
+	    }
+	    return -1;
 	}	
 
 	var names=[];
 	var coords=[];	
-//filter out duplicate stations 
+	//filter out duplicate stations 
 	good = stats.filter(function (el) {
 	if(myIndexOf([el.Station_Latitude,el.Station_Longitude])==-1 /*&& el.STATION !=='Pacific St' && el.STATION !=='Jackson Heights-Roosevelt Ave' && el.STATION !=='168th St - Washington Heights' && el.STATION !=='23rd St-Ely Av' && el.WEEKDAY=='0'  && (el.TIME=='8:00:00' || el.TIME=='08:00:00')*/){
 		//console.log("Made it past the check!");
@@ -237,7 +223,7 @@
 	});
 
 	console.log(names);
-//combine boundaries into one giant path
+	//combine boundaries into one giant path
 	var combinedD = "";
 	g.selectAll("path")
 		.each(function() { combinedD += d3.select(this).attr("d"); });
@@ -245,18 +231,18 @@
 	g.append("clipPath")
 	.attr("id", "boundary")
 	.append("path") 
-    .attr("d", combinedD)
-    .attr("stroke", "red")
+    	.attr("d", combinedD)
+    	.attr("stroke", "red")
 	.attr("stroke-width",1)
 	.attr("fill","none");
 
 	
 	
-//generate daily values for each region
+	//generate daily values for each region
 	var values = d3.range(vertices.length).map(function(d,i) {
-//console.log(names[i])
+	//console.log(names[i])
 	var tempdata=stats.filter(function(el){
-//console.log(el.LINENAME+" vs "+names[i].substring(names[i].indexOf(' , ')+3));
+	//console.log(el.LINENAME+" vs "+names[i].substring(names[i].indexOf(' , ')+3));
 	if(el.ID==names[i].substring(0,names[i].indexOf(' , ')) && el.STATION==names[i].substring(names[i].indexOf(' , ')+3)){
 	return true }else{return false};});
 
@@ -266,7 +252,7 @@
 	UsageByVertexId.set(i,tempdata[0].dENTRIES/1500)
     return holder;});
 	
-//add the voronoi polygons
+	//add the voronoi polygons
 	g.selectAll("#voronoipaths")
       .data(d3.geom.voronoi(vertices))
 	  .enter().append("svg:path")
@@ -277,16 +263,13 @@
 	  .attr("clip-path", 'url(#boundary)')
       .attr("d", function(d,i){
 	  return "M" + d.join(",") + "Z"; })
-	
-//Modify chart
-
 			
-//parameters to shift the graph
+	//parameters to shift the graph
 	var xshift=270;
 	var yshift=0;
 
 
-//add dots for stations
+	//add dots for stations
 	var radius=1;
 	g.selectAll("circle")
 		.data(good)
@@ -300,8 +283,6 @@
 		.attr("stroke","rgba(100,100,100,.5)")
 		.append("svg:title");
 	});
-	
-// A nice d3 axis
 
 </script>
 <body>
